@@ -115,7 +115,6 @@ banking-mock/
 │   └── docs/openapi.yaml      # OpenAPI specification
 ├── docker-compose.yml         # Local development setup
 ├── docker-compose.prod.yml    # Production deployment
-├── deploy.sh                  # Azure deployment script
 └── dev.sh                     # Local development helper
 ```
 
@@ -176,25 +175,6 @@ docker compose up -d --scale banking-assistant=2
 # View service logs
 docker compose logs banking-assistant
 ```
-
-### Azure Container Instances (Production)
-
-The project includes automated Azure deployment:
-
-```bash
-# Configure deployment variables
-cp deploy.env.example deploy.env
-# Edit deploy.env with your Azure settings
-
-# Deploy to Azure
-./deploy.sh
-```
-
-**Azure Resources Created**:
-- Azure Container Registry (ACR)
-- Azure Container Instances (ACI)
-- Resource Group with networking
-- Load balancing and health checks
 
 ### Environment Variables
 
