@@ -6,7 +6,7 @@ info:
   contact:
     name: Banking Assistant Team
 servers:
-  - url: http://localhost:3000/api/v1
+  - url: http://localhost:3000
     description: Development server (will be replaced dynamically at runtime)
 paths:
   /health:
@@ -36,7 +36,7 @@ paths:
                   version:
                     type: string
                     example: 1.0.0
-  /accounts/{accountId}/balance:
+  /api/v1/accounts/{accountId}/balance:
     get:
       summary: Get account balance
       description: Retrieve the current balance for a specific account
@@ -77,7 +77,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ServerError'
-  /accounts/{accountId}/transactions:
+  /api/v1/accounts/{accountId}/transactions:
     get:
       summary: Get account transactions
       description: Retrieve transaction history for a specific account with pagination
@@ -135,7 +135,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ServerError'
-  /users/{userId}/accounts:
+  /api/v1/users/{userId}/accounts:
     get:
       summary: Get accounts for a user
       description: Retrieve all accounts associated with a specific user
@@ -202,7 +202,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ServerError'
-  /accounts/{accountId}:
+  /api/v1/accounts/{accountId}:
     get:
       summary: Get account details
       description: Retrieve detailed information for a specific account

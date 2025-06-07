@@ -8,7 +8,7 @@ info:
   license:
     name: MIT
 servers:
-  - url: http://localhost:3001/api/v1
+  - url: http://localhost:3001
     description: Development server (will be replaced dynamically at runtime)
 paths:
   /health:
@@ -38,7 +38,7 @@ paths:
                   version:
                     type: string
                     example: 1.0.0
-  /brokerage/accounts:
+  /api/v1/brokerage/accounts:
     post:
       summary: Create new brokerage account
       description: Opens a new brokerage account for investment trading
@@ -87,7 +87,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ServerError'
-  /brokerage/users/{userId}/accounts:
+  /api/v1/brokerage/users/{userId}/accounts:
     get:
       summary: List user's brokerage accounts
       description: Retrieve all brokerage accounts for a specific user with pagination and filtering
@@ -157,7 +157,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ServerError'
-  /brokerage/accounts/{accountId}:
+  /api/v1/brokerage/accounts/{accountId}:
     get:
       summary: Get brokerage account details
       description: Retrieve detailed information for a specific brokerage account

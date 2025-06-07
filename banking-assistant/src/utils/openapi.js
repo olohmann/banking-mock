@@ -40,7 +40,7 @@ export function generateOpenAPISpec(options = {}) {
   } else {
     // Auto-generate URL for local development
     servers.push({
-      url: `http://localhost:${port}/api/${apiVersion}`,
+      url: `http://localhost:${port}`,
       description: 'Local development server',
     });
   }
@@ -48,7 +48,7 @@ export function generateOpenAPISpec(options = {}) {
   // Always include localhost for development if not already present and not in production
   if (nodeEnv === 'development' && baseUrl && !baseUrl.includes('localhost')) {
     servers.push({
-      url: `http://localhost:${port}/api/${apiVersion}`,
+      url: `http://localhost:${port}`,
       description: 'Local development server',
     });
   }
@@ -75,5 +75,5 @@ export function generateOpenAPISpec(options = {}) {
  */
 export function getPrimaryServerUrl(options = {}) {
   const spec = generateOpenAPISpec(options);
-  return spec.servers[0]?.url || 'http://localhost:3000/api/v1';
+  return spec.servers[0]?.url || 'http://localhost:3000';
 }

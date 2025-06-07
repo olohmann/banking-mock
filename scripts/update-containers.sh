@@ -89,6 +89,7 @@ update_container_apps() {
     terraform init
     
     print_status "Using image tag: $IMAGE_TAG"
+    print_status "BASE_URL will be automatically configured for each container app"
     
     print_status "Planning container apps update..."
     terraform plan -var "image_tag=$IMAGE_TAG" -out=tfplan

@@ -22,6 +22,12 @@ data "azurerm_container_registry" "main" {
   resource_group_name = data.azurerm_resource_group.main.name
 }
 
+# Local values for constructing URLs
+locals {
+  banking_assistant_app_name = "ca-banking-assistant"
+  banking_brokerage_app_name = "ca-banking-brokerage"
+}
+
 # Variables
 variable "resource_group_name" {
   description = "Name of the existing resource group"
@@ -78,7 +84,7 @@ resource "azurerm_container_app_environment" "main" {
 
 # Banking Assistant Container App
 resource "azurerm_container_app" "banking_assistant" {
-  name                         = "ca-banking-assistant"
+  name                         = local.banking_assistant_app_name
   container_app_environment_id = azurerm_container_app_environment.main.id
   resource_group_name          = data.azurerm_resource_group.main.name
   revision_mode                = "Single"
@@ -99,6 +105,16 @@ resource "azurerm_container_app" "banking_assistant" {
       env {
         name  = "PORT"
         value = "3000"
+      }
+
+      env {
+        name  = "BASE_URL"
+        value = "https://${local.banking_assistant_app_name}.${azurerm_container_app_environment.main.default_domain}"
+      }
+
+      env {
+        name  = "TRUST_PROXY"
+        value = "true"
       }
     }
 
@@ -132,7 +148,7 @@ resource "azurerm_container_app" "banking_assistant" {
 
 # Banking Brokerage Container App
 resource "azurerm_container_app" "banking_brokerage" {
-  name                         = "ca-banking-brokerage"
+  name                         = local.banking_brokerage_app_name
   container_app_environment_id = azurerm_container_app_environment.main.id
   resource_group_name          = data.azurerm_resource_group.main.name
   revision_mode                = "Single"
@@ -153,6 +169,16 @@ resource "azurerm_container_app" "banking_brokerage" {
       env {
         name  = "PORT"
         value = "3000"
+      }
+
+      env {
+        name  = "BASE_URL"
+        value = "https://${local.banking_brokerage_app_name}.${azurerm_container_app_environment.main.default_domain}"
+      }
+
+      env {
+        name  = "TRUST_PROXY"
+        value = "true"
       }
     }
 
