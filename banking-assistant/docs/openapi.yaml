@@ -6,7 +6,7 @@ info:
   contact:
     name: Banking Assistant Team
 servers:
-  - url: http://localhost:3000/api/v1
+  - url: http://localhost:3002/api/v1
     description: Development server
 paths:
   /health:
@@ -24,6 +24,9 @@ paths:
               schema:
                 type: object
                 properties:
+                  service:
+                    type: string
+                    example: banking-assistant-mock
                   status:
                     type: string
                     example: healthy
@@ -120,6 +123,108 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/ValidationError'
+        '404':
+          description: Account not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundError'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServerError'
+  /users/{userId}/accounts:
+    get:
+      summary: Get accounts for a user
+      description: Retrieve all accounts associated with a specific user
+      operationId: getUserAccounts
+      tags:
+        - Accounts
+        - Users
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          description: Unique user identifier
+          schema:
+            type: string
+            pattern: '^[A-Z0-9]{8,16}$'
+            example: USER1234
+        - name: limit
+          in: query
+          required: false
+          description: Maximum number of accounts to return (1-50)
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 50
+            default: 10
+        - name: offset
+          in: query
+          required: false
+          description: Number of accounts to skip
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+        - name: status
+          in: query
+          required: false
+          description: Filter by account status
+          schema:
+            type: string
+            enum: [active, inactive, suspended, closed]
+        - name: accountType
+          in: query
+          required: false
+          description: Filter by account type
+          schema:
+            type: string
+            enum: [checking, savings, credit, loan]
+      responses:
+        '200':
+          description: List of accounts for the user
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedAccountsResponse'
+        '400':
+          description: Invalid request parameters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServerError'
+  /accounts/{accountId}:
+    get:
+      summary: Get account details
+      description: Retrieve detailed information for a specific account
+      operationId: getAccountDetails
+      tags:
+        - Accounts
+      parameters:
+        - name: accountId
+          in: path
+          required: true
+          description: Unique account identifier
+          schema:
+            type: string
+            pattern: '^[A-Z0-9]{10,20}$'
+            example: ACC1234567890
+      responses:
+        '200':
+          description: Account details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BankingAccount'
         '404':
           description: Account not found
           content:
@@ -289,8 +394,104 @@ components:
         stack:
           type: string
           description: Error stack trace (development only)
+    BankingAccount:
+      type: object
+      required:
+        - accountId
+        - userId
+        - accountType
+        - status
+        - balance
+        - currency
+        - accountName
+        - createdAt
+        - lastActivity
+      properties:
+        accountId:
+          type: string
+          pattern: '^[A-Z0-9]{10,20}$'
+          description: Unique account identifier
+          example: ACC1234567890
+        userId:
+          type: string
+          pattern: '^[A-Z0-9]{8,16}$'
+          description: User identifier
+          example: USER1234
+        accountType:
+          type: string
+          enum: [checking, savings, credit, loan]
+          description: Type of account
+          example: checking
+        status:
+          type: string
+          enum: [active, inactive, suspended, closed]
+          description: Account status
+          example: active
+        balance:
+          type: number
+          format: float
+          description: Current account balance
+          example: 15420.50
+        currency:
+          type: string
+          minLength: 3
+          maxLength: 3
+          description: Currency code
+          example: USD
+        accountName:
+          type: string
+          description: Account display name
+          example: Primary Checking
+        createdAt:
+          type: string
+          format: date-time
+          description: Account creation timestamp
+          example: '2024-01-10T08:00:00.000Z'
+        lastActivity:
+          type: string
+          format: date-time
+          description: Last account activity timestamp
+          example: '2025-06-07T10:30:00.000Z'
+    PaginatedAccountsResponse:
+      type: object
+      required:
+        - data
+        - pagination
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/BankingAccount'
+        pagination:
+          type: object
+          required:
+            - total
+            - limit
+            - offset
+            - hasMore
+          properties:
+            total:
+              type: integer
+              description: Total number of accounts available
+              example: 2
+            limit:
+              type: integer
+              description: Number of accounts requested
+              example: 10
+            offset:
+              type: integer
+              description: Number of accounts skipped
+              example: 0
+            hasMore:
+              type: boolean
+              description: Whether there are more accounts available
+              example: false
 tags:
   - name: Health
     description: Service health endpoints
   - name: Accounts
     description: Account-related operations
+  - name: Users
+    description: User-related operations
+  - name: Users
+    description: User-related operations

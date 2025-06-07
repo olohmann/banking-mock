@@ -1,8 +1,19 @@
 import { Router } from 'express';
 import { z } from 'zod';
 import { validateRequest } from '../middleware/index.js';
-import { accountIdSchema, transactionQuerySchema } from '../schemas/index.js';
-import { getAccountBalance, getAccountTransactions, accountExists } from '../services/mockData.js';
+import {
+  userIdSchema,
+  accountIdSchema,
+  transactionQuerySchema,
+  listAccountsQuerySchema,
+} from '../schemas/index.js';
+import {
+  getAccountBalance,
+  getAccountTransactions,
+  accountExists,
+  getBankingAccountsByUserId,
+  getBankingAccountById,
+} from '../services/mockData.js';
 
 const router = Router();
 
@@ -65,12 +76,90 @@ router.get(
 );
 
 /**
+ * Get banking accounts for a specific user
+ * @route GET /api/v1/users/:userId/accounts
+ * @param {string} userId - User identifier
+ * @query {number} [limit=10] - Number of accounts to return (1-50)
+ * @query {number} [offset=0] - Number of accounts to skip
+ * @query {string} [status] - Filter by account status
+ * @query {string} [accountType] - Filter by account type
+ * @returns {Object} Paginated list of banking accounts
+ */
+router.get(
+  '/users/:userId/accounts',
+  validateRequest({
+    params: z.object({ userId: userIdSchema }),
+    query: listAccountsQuerySchema,
+  }),
+  (req, res) => {
+    const { userId } = req.params;
+    const {
+      limit,
+      offset,
+      status,
+      accountType,
+    } = req.query;
+
+    try {
+      const result = getBankingAccountsByUserId(userId, {
+        limit,
+        offset,
+        status,
+        accountType,
+      });
+
+      return res.json(result);
+    } catch (error) {
+      console.error('Error fetching banking accounts:', error);
+      return res.status(500).json({
+        error: 'Failed to fetch banking accounts',
+      });
+    }
+  },
+);
+
+/**
+ * Get a specific banking account by ID
+ * @route GET /api/v1/accounts/:accountId
+ * @param {string} accountId - Banking account identifier
+ * @returns {Object} Banking account details
+ */
+router.get(
+  '/accounts/:accountId',
+  validateRequest({
+    params: z.object({ accountId: accountIdSchema }),
+  }),
+  (req, res) => {
+    const { accountId } = req.params;
+
+    try {
+      const account = getBankingAccountById(accountId);
+
+      if (!account) {
+        return res.status(404).json({
+          error: 'Banking account not found',
+          accountId,
+        });
+      }
+
+      return res.json(account);
+    } catch (error) {
+      console.error('Error fetching banking account:', error);
+      return res.status(500).json({
+        error: 'Failed to fetch banking account',
+      });
+    }
+  },
+);
+
+/**
  * Health check endpoint
  * @route GET /api/v1/health
  * @returns {Object} Service health status
  */
 router.get('/health', (req, res) => {
   res.json({
+    service: 'banking-assistant-mock',
     status: 'healthy',
     timestamp: new Date().toISOString(),
     version: '1.0.0',

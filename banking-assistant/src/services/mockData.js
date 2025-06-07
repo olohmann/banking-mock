@@ -2,14 +2,72 @@
  * Mock banking data service
  */
 
+// In-memory storage for demo purposes
+const bankingAccounts = new Map();
+
 /**
- * Mock account balances
+ * Mock account data with user associations
+ */
+const sampleAccounts = [
+  {
+    accountId: 'ACC1234567890',
+    userId: 'USER1234',
+    accountType: 'checking',
+    status: 'active',
+    balance: 15420.50,
+    currency: 'USD',
+    accountName: 'Primary Checking',
+    createdAt: '2024-01-10T08:00:00.000Z',
+    lastActivity: '2025-06-07T10:30:00.000Z',
+  },
+  {
+    accountId: 'ACC9876543210',
+    userId: 'USER1234',
+    accountType: 'savings',
+    status: 'active',
+    balance: 8750.25,
+    currency: 'USD',
+    accountName: 'Emergency Savings',
+    createdAt: '2024-01-10T08:15:00.000Z',
+    lastActivity: '2025-06-05T16:22:00.000Z',
+  },
+  {
+    accountId: 'ACC5555666677',
+    userId: 'USER5678',
+    accountType: 'checking',
+    status: 'active',
+    balance: 125000.00,
+    currency: 'USD',
+    accountName: 'Business Checking',
+    createdAt: '2024-02-15T10:30:00.000Z',
+    lastActivity: '2025-06-06T14:45:00.000Z',
+  },
+  {
+    accountId: 'ACC1111222233',
+    userId: 'USER5678',
+    accountType: 'credit',
+    status: 'active',
+    balance: -2500.75,
+    currency: 'USD',
+    accountName: 'Platinum Credit Card',
+    createdAt: '2024-03-01T12:00:00.000Z',
+    lastActivity: '2025-06-07T09:15:00.000Z',
+  },
+];
+
+// Initialize mock data
+sampleAccounts.forEach((account) => {
+  bankingAccounts.set(account.accountId, account);
+});
+
+/**
+ * Legacy mock balances for backward compatibility
  */
 const MOCK_BALANCES = {
   ACC1234567890: { balance: 15420.50, currency: 'USD' },
-  ACC9876543210: { balance: 8750.25, currency: 'EUR' },
+  ACC9876543210: { balance: 8750.25, currency: 'USD' },
   ACC5555666677: { balance: 125000.00, currency: 'USD' },
-  ACC1111222233: { balance: 2500.75, currency: 'GBP' },
+  ACC1111222233: { balance: -2500.75, currency: 'USD' },
 };
 
 /**
@@ -113,3 +171,83 @@ export const getAccountTransactions = (accountId, limit = 10, offset = 0) => {
  * @returns {boolean} True if account exists
  */
 export const accountExists = (accountId) => Boolean(MOCK_BALANCES[accountId]);
+
+/**
+ * Get banking accounts for a specific user
+ * @param {string} userId - User identifier
+ * @param {Object} options - Query options
+ * @param {number} [options.limit=10] - Maximum number of accounts to return
+ * @param {number} [options.offset=0] - Number of accounts to skip
+ * @param {string} [options.status] - Filter by account status
+ * @param {string} [options.accountType] - Filter by account type
+ * @returns {Object} Paginated list of banking accounts
+ */
+export const getBankingAccountsByUserId = (userId, options = {}) => {
+  const {
+    limit = 10,
+    offset = 0,
+    status,
+    accountType,
+  } = options;
+
+  // Filter accounts by user ID
+  const userAccounts = Array.from(bankingAccounts.values()).filter(
+    (account) => account.userId === userId,
+  );
+
+  // Apply additional filters
+  let filteredAccounts = userAccounts;
+
+  if (status) {
+    filteredAccounts = filteredAccounts.filter((account) => account.status === status);
+  }
+
+  if (accountType) {
+    filteredAccounts = filteredAccounts.filter((account) => account.accountType === accountType);
+  }
+
+  // Sort by creation date (newest first)
+  filteredAccounts.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+  const total = filteredAccounts.length;
+  const paginatedAccounts = filteredAccounts.slice(offset, offset + limit);
+
+  return {
+    data: paginatedAccounts,
+    pagination: {
+      total,
+      limit,
+      offset,
+      hasMore: offset + limit < total,
+    },
+  };
+};
+
+/**
+ * Get a specific banking account by ID
+ * @param {string} accountId - Account identifier
+ * @returns {Object|null} Banking account or null if not found
+ */
+export const getBankingAccountById = (accountId) => bankingAccounts.get(accountId) || null;
+
+/**
+ * Check if a user exists (simplified check based on existing accounts)
+ * @param {string} userId - User identifier
+ * @returns {boolean} True if user has at least one account
+ */
+export const userExists = (userId) => {
+  const accounts = Array.from(bankingAccounts.values());
+  return accounts.some((account) => account.userId === userId);
+};
+
+/**
+ * Get all unique user IDs (for testing purposes)
+ * @returns {Array<string>} Array of user IDs
+ */
+export const getAllUserIds = () => {
+  const userIds = new Set();
+  bankingAccounts.forEach((account) => {
+    userIds.add(account.userId);
+  });
+  return Array.from(userIds);
+};
