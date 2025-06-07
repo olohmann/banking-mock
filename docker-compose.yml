@@ -1,0 +1,46 @@
+version: '3.8'
+
+services:
+  banking-assistant:
+    build:
+      context: ./banking-assistant
+      dockerfile: Dockerfile
+    ports:
+      - "3001:3000"
+    environment:
+      - NODE_ENV=development
+      - PORT=3000
+    volumes:
+      - ./banking-assistant/src:/app/src:ro
+      - ./banking-assistant/docs:/app/docs:ro
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "node", "-e", "import('http').then(http => { const req = http.get('http://localhost:3000/api/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) }); req.on('error', () => process.exit(1)); })"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  banking-brokerage:
+    build:
+      context: ./banking-brokerage
+      dockerfile: Dockerfile
+    ports:
+      - "3002:3000"
+    environment:
+      - NODE_ENV=development
+      - PORT=3000
+    volumes:
+      - ./banking-brokerage/src:/app/src:ro
+      - ./banking-brokerage/docs:/app/docs:ro
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "node", "-e", "import('http').then(http => { const req = http.get('http://localhost:3000/api/health', (res) => { process.exit(res.statusCode === 200 ? 0 : 1) }); req.on('error', () => process.exit(1)); })"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+networks:
+  default:
+    name: banking-mock-network
