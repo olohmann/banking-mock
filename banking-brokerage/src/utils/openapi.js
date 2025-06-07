@@ -13,57 +13,42 @@ const __dirname = dirname(__filename);
  * @param {string} [options.baseUrl] - Base URL for the API server
  * @param {number} [options.port] - Port number for local development
  * @param {string} [options.nodeEnv] - Environment (development, staging, production)
+ * @param {string} [options.apiVersion] - API version (e.g., 'v1')
  * @returns {object} OpenAPI specification with dynamic server URLs
  */
 export function generateOpenAPISpec(options = {}) {
   const {
-    baseUrl = process.env.BROKERAGE_API_BASE_URL,
+    baseUrl = process.env.BASE_URL,
     port = process.env.PORT || 3001,
     nodeEnv = process.env.NODE_ENV || 'development',
+    apiVersion = process.env.API_VERSION || 'v1',
   } = options;
 
   // Load the base OpenAPI spec
   const specPath = join(__dirname, '../../docs/openapi.yaml');
   const baseSpec = YAML.load(specPath);
 
-  // Generate server URLs based on environment and configuration
+  // Generate server URLs based on configuration
   const servers = [];
 
   if (baseUrl) {
-    // Use explicit base URL if provided
+    // Use explicit base URL if provided (handles reverse proxy scenarios)
     servers.push({
       url: baseUrl,
       description: 'Configured API server',
     });
   } else {
-    // Generate URLs based on environment
-    switch (nodeEnv) {
-      case 'production':
-        servers.push({
-          url: process.env.PRODUCTION_API_URL || 'https://api.yourdomain.com/brokerage/v1',
-          description: 'Production server',
-        });
-        break;
-      case 'staging':
-        servers.push({
-          url: process.env.STAGING_API_URL || 'https://api-staging.yourdomain.com/brokerage/v1',
-          description: 'Staging server',
-        });
-        break;
-      case 'development':
-      default:
-        servers.push({
-          url: `http://localhost:${port}/api/v1`,
-          description: 'Development server',
-        });
-        break;
-    }
+    // Auto-generate URL for local development
+    servers.push({
+      url: `http://localhost:${port}/api/${apiVersion}`,
+      description: 'Local development server',
+    });
   }
 
-  // Always include localhost for development if not already present
-  if (nodeEnv !== 'development' && !servers.some((s) => s.url.includes('localhost'))) {
+  // Always include localhost for development if not already present and not in production
+  if (nodeEnv === 'development' && baseUrl && !baseUrl.includes('localhost')) {
     servers.push({
-      url: `http://localhost:${port}/api/v1`,
+      url: `http://localhost:${port}/api/${apiVersion}`,
       description: 'Local development server',
     });
   }
@@ -76,6 +61,7 @@ export function generateOpenAPISpec(options = {}) {
       ...baseSpec.info,
       'x-generated-at': new Date().toISOString(),
       'x-environment': nodeEnv,
+      'x-api-version': apiVersion,
     },
   };
 

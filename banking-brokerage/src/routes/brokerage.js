@@ -59,7 +59,9 @@ router.get(
   }),
   (req, res) => {
     const { userId } = req.params;
-    const { limit, offset, status, accountType } = req.query;
+    const {
+      limit, offset, status, accountType,
+    } = req.query;
 
     try {
       const result = getBrokerageAccountsByUserId(userId, {

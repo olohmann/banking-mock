@@ -10,10 +10,16 @@ const config = {
   port: parseInt(process.env.PORT, 10) || 3001,
   nodeEnv: process.env.NODE_ENV || 'development',
   logLevel: process.env.LOG_LEVEL || 'info',
-  // API URL configuration
-  baseUrl: process.env.BROKERAGE_API_BASE_URL,
-  productionApiUrl: process.env.PRODUCTION_API_URL,
-  stagingApiUrl: process.env.STAGING_API_URL,
+  apiVersion: process.env.API_VERSION || 'v1',
+
+  // API URL configuration - single consolidated base URL
+  baseUrl: process.env.BASE_URL,
+
+  // Reverse proxy configuration
+  trustProxy: process.env.TRUST_PROXY === 'true',
+
+  // Security configuration
+  allowedOrigins: process.env.ALLOWED_ORIGINS?.split(',') || ['*'],
 };
 
 export default config;

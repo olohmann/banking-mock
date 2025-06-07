@@ -104,7 +104,9 @@ export const createBrokerageAccount = (accountData) => {
  * @returns {Object} Paginated list of brokerage accounts
  */
 export const getBrokerageAccountsByUserId = (userId, options = {}) => {
-  const { limit = 10, offset = 0, status, accountType } = options;
+  const {
+    limit = 10, offset = 0, status, accountType,
+  } = options;
 
   // Filter accounts by user ID
   const userAccounts = Array.from(brokerageAccounts.values()).filter(
@@ -158,8 +160,8 @@ export const brokerageAccountExists = (accountId) => brokerageAccounts.has(accou
  * @param {string} userId - User identifier
  * @returns {boolean} True if user has at least one account
  */
-export const userExists = (userId) =>
-  Array.from(brokerageAccounts.values()).some((account) => account.userId === userId);
+export const userExists = (userId) => Array.from(brokerageAccounts.values())
+  .some((account) => account.userId === userId);
 
 /**
  * Get all unique user IDs (for testing purposes)
