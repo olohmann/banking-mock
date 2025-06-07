@@ -9,7 +9,7 @@ info:
     name: MIT
 servers:
   - url: http://localhost:3001/api/v1
-    description: Development server
+    description: Development server (will be replaced dynamically at runtime)
 paths:
   /health:
     get:

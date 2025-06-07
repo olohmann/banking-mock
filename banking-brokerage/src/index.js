@@ -1,16 +1,9 @@
 import express from 'express';
 import swaggerUi from 'swagger-ui-express';
-import YAML from 'yamljs';
-import { fileURLToPath } from 'node:url';
-import { dirname, join } from 'node:path';
 import config from './config/index.js';
 import brokerageRoutes from './routes/brokerage.js';
 import { errorHandler, notFoundHandler } from './middleware/index.js';
-
-// eslint-disable-next-line no-underscore-dangle
-const __filename = fileURLToPath(import.meta.url);
-// eslint-disable-next-line no-underscore-dangle
-const __dirname = dirname(__filename);
+import { generateOpenAPISpec } from './utils/openapi.js';
 
 /**
  * Create Express application instance
@@ -45,8 +38,11 @@ const createApp = () => {
     next();
   });
 
-  // Load OpenAPI spec
-  const openApiSpec = YAML.load(join(__dirname, '../docs/openapi.yaml'));
+  // Load OpenAPI spec with dynamic server URLs
+  const openApiSpec = generateOpenAPISpec({
+    port: config.port,
+    nodeEnv: config.nodeEnv,
+  });
 
   // API documentation
   app.use(
@@ -57,6 +53,11 @@ const createApp = () => {
       customCss: '.swagger-ui .topbar { display: none }',
     }),
   );
+
+  // Serve OpenAPI spec as JSON
+  app.get('/openapi.json', (req, res) => {
+    res.json(openApiSpec);
+  });
 
   // Health check route
   app.get('/health', (req, res) => {

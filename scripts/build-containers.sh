@@ -1,4 +1,4 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
 # Banking Mock Services - Container Build and Push Script
 # This script builds Docker images and pushes them to Azure Container Registry
@@ -17,11 +17,8 @@ ACR_NAME="${ACR_NAME:-}"
 RESOURCE_GROUP="${RESOURCE_GROUP:-}"
 IMAGE_TAG="${IMAGE_TAG:-latest}"
 
-# Service definitions
-declare -A SERVICES=(
-    ["banking-assistant"]="banking-assistant"
-    ["banking-brokerage"]="banking-brokerage"
-)
+# Service definitions - using simple arrays
+SERVICES="banking-assistant banking-brokerage"
 
 print_status() {
     echo -e "${BLUE}[INFO]${NC} $1"
@@ -151,8 +148,8 @@ main() {
     echo
     
     # Build and push each service
-    for service_name in "${!SERVICES[@]}"; do
-        service_dir="${SERVICES[$service_name]}"
+    for service_name in $SERVICES; do
+        service_dir="$service_name"
         
         if [[ ! -d "$service_dir" ]]; then
             print_warning "Service directory not found: $service_dir, skipping..."
