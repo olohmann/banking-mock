@@ -1,0 +1,296 @@
+openapi: 3.0.3
+info:
+  title: Banking Assistant Mock API
+  description: Mock banking API for testing and development purposes
+  version: 1.0.0
+  contact:
+    name: Banking Assistant Team
+servers:
+  - url: http://localhost:3000/api/v1
+    description: Development server
+paths:
+  /health:
+    get:
+      summary: Health check
+      description: Returns the health status of the API
+      operationId: getHealth
+      tags:
+        - Health
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: healthy
+                  timestamp:
+                    type: string
+                    format: date-time
+                  version:
+                    type: string
+                    example: 1.0.0
+  /accounts/{accountId}/balance:
+    get:
+      summary: Get account balance
+      description: Retrieve the current balance for a specific account
+      operationId: getAccountBalance
+      tags:
+        - Accounts
+      parameters:
+        - name: accountId
+          in: path
+          required: true
+          description: Unique account identifier
+          schema:
+            type: string
+            pattern: '^[A-Z0-9]{10,20}$'
+            example: ACC1234567890
+      responses:
+        '200':
+          description: Account balance retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AccountBalance'
+        '400':
+          description: Invalid account ID format
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+        '404':
+          description: Account not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundError'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServerError'
+  /accounts/{accountId}/transactions:
+    get:
+      summary: Get account transactions
+      description: Retrieve transaction history for a specific account with pagination
+      operationId: getAccountTransactions
+      tags:
+        - Accounts
+      parameters:
+        - name: accountId
+          in: path
+          required: true
+          description: Unique account identifier
+          schema:
+            type: string
+            pattern: '^[A-Z0-9]{10,20}$'
+            example: ACC1234567890
+        - name: limit
+          in: query
+          required: false
+          description: Number of transactions to return (1-100)
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 100
+            default: 10
+        - name: offset
+          in: query
+          required: false
+          description: Number of transactions to skip for pagination
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+      responses:
+        '200':
+          description: Account transactions retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/TransactionsResponse'
+        '400':
+          description: Invalid request parameters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+        '404':
+          description: Account not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundError'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServerError'
+components:
+  schemas:
+    AccountBalance:
+      type: object
+      required:
+        - accountId
+        - balance
+        - currency
+        - lastUpdated
+      properties:
+        accountId:
+          type: string
+          description: Unique account identifier
+          example: ACC1234567890
+        balance:
+          type: number
+          format: float
+          description: Current account balance
+          example: 15420.50
+        currency:
+          type: string
+          minLength: 3
+          maxLength: 3
+          description: Currency code (ISO 4217)
+          example: USD
+        lastUpdated:
+          type: string
+          format: date-time
+          description: Timestamp of last balance update
+          example: '2025-06-07T10:30:00.000Z'
+    Transaction:
+      type: object
+      required:
+        - id
+        - accountId
+        - amount
+        - currency
+        - description
+        - type
+        - date
+        - balance
+      properties:
+        id:
+          type: string
+          description: Unique transaction identifier
+          example: TXN78900001
+        accountId:
+          type: string
+          description: Account identifier
+          example: ACC1234567890
+        amount:
+          type: number
+          format: float
+          description: Transaction amount (positive for credits, negative for debits)
+          example: -67.23
+        currency:
+          type: string
+          minLength: 3
+          maxLength: 3
+          description: Currency code (ISO 4217)
+          example: USD
+        description:
+          type: string
+          description: Transaction description
+          example: Grocery Store
+        type:
+          type: string
+          enum: [debit, credit]
+          description: Transaction type
+          example: debit
+        date:
+          type: string
+          format: date-time
+          description: Transaction date
+          example: '2025-06-06T14:22:33.000Z'
+        balance:
+          type: number
+          format: float
+          description: Account balance after this transaction
+          example: 15487.73
+    TransactionsResponse:
+      type: object
+      required:
+        - accountId
+        - transactions
+        - pagination
+      properties:
+        accountId:
+          type: string
+          description: Account identifier
+          example: ACC1234567890
+        transactions:
+          type: array
+          items:
+            $ref: '#/components/schemas/Transaction'
+        pagination:
+          type: object
+          required:
+            - limit
+            - offset
+            - total
+          properties:
+            limit:
+              type: integer
+              description: Number of transactions requested
+              example: 10
+            offset:
+              type: integer
+              description: Number of transactions skipped
+              example: 0
+            total:
+              type: integer
+              description: Total number of transactions available
+              example: 50
+    ValidationError:
+      type: object
+      required:
+        - error
+        - details
+      properties:
+        error:
+          type: string
+          example: Validation failed
+        details:
+          type: array
+          items:
+            type: object
+            properties:
+              field:
+                type: string
+                example: accountId
+              message:
+                type: string
+                example: Account ID must be 10-20 alphanumeric characters
+    NotFoundError:
+      type: object
+      required:
+        - error
+        - accountId
+      properties:
+        error:
+          type: string
+          example: Account not found
+        accountId:
+          type: string
+          example: ACC1234567890
+    ServerError:
+      type: object
+      required:
+        - error
+      properties:
+        error:
+          type: string
+          example: Internal server error
+        stack:
+          type: string
+          description: Error stack trace (development only)
+tags:
+  - name: Health
+    description: Service health endpoints
+  - name: Accounts
+    description: Account-related operations
