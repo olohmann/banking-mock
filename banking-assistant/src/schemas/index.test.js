@@ -1,4 +1,4 @@
-import { describe, it, mock } from 'node:test';
+import { describe, it } from 'node:test';
 import assert from 'node:assert';
 import {
   accountIdSchema,
@@ -13,7 +13,7 @@ describe('Validation Schemas', () => {
   describe('accountIdSchema', () => {
     it('should validate correct account ID', () => {
       const validIds = ['ACC1234567890', 'BANK1234567890123456'];
-      
+
       validIds.forEach((id) => {
         assert.doesNotThrow(() => accountIdSchema.parse(id));
       });
@@ -21,7 +21,7 @@ describe('Validation Schemas', () => {
 
     it('should reject invalid account IDs', () => {
       const invalidIds = ['acc123', '123456789', 'ABC!@#$%^&*()', 'A', ''];
-      
+
       invalidIds.forEach((id) => {
         assert.throws(() => accountIdSchema.parse(id));
       });
@@ -34,14 +34,14 @@ describe('Validation Schemas', () => {
         limit: '20',
         offset: '10',
       });
-      
+
       assert.strictEqual(result.limit, 20);
       assert.strictEqual(result.offset, 10);
     });
 
     it('should apply defaults for missing parameters', () => {
       const result = transactionQuerySchema.parse({});
-      
+
       assert.strictEqual(result.limit, 10);
       assert.strictEqual(result.offset, 0);
     });
@@ -61,7 +61,7 @@ describe('Validation Schemas', () => {
   describe('userIdSchema', () => {
     it('should validate correct user IDs', () => {
       const validIds = ['USER1234', 'ABC12345DEFG', 'A1B2C3D4'];
-      
+
       validIds.forEach((id) => {
         assert.doesNotThrow(() => userIdSchema.parse(id));
       });
@@ -69,7 +69,7 @@ describe('Validation Schemas', () => {
 
     it('should reject invalid user IDs', () => {
       const invalidIds = ['user123', 'ABC!DEF', 'AB12345', 'ABCDEFGHIJKLMNOPQRSTUVWXYZ', ''];
-      
+
       invalidIds.forEach((id) => {
         assert.throws(() => userIdSchema.parse(id));
       });
@@ -84,7 +84,7 @@ describe('Validation Schemas', () => {
         status: 'active',
         accountType: 'checking',
       });
-      
+
       assert.strictEqual(result.limit, 25);
       assert.strictEqual(result.offset, 5);
       assert.strictEqual(result.status, 'active');
@@ -93,7 +93,7 @@ describe('Validation Schemas', () => {
 
     it('should apply defaults for missing parameters', () => {
       const result = listAccountsQuerySchema.parse({});
-      
+
       assert.strictEqual(result.limit, 10);
       assert.strictEqual(result.offset, 0);
     });
@@ -115,7 +115,7 @@ describe('Validation Schemas', () => {
   describe('accountTypeSchema', () => {
     it('should validate correct account types', () => {
       const validTypes = ['checking', 'savings', 'credit', 'loan'];
-      
+
       validTypes.forEach((type) => {
         assert.doesNotThrow(() => accountTypeSchema.parse(type));
       });
@@ -123,7 +123,7 @@ describe('Validation Schemas', () => {
 
     it('should reject invalid account types', () => {
       const invalidTypes = ['investment', 'mortgage', 'invalid', ''];
-      
+
       invalidTypes.forEach((type) => {
         assert.throws(() => accountTypeSchema.parse(type));
       });
@@ -133,7 +133,7 @@ describe('Validation Schemas', () => {
   describe('accountStatusSchema', () => {
     it('should validate correct account statuses', () => {
       const validStatuses = ['active', 'inactive', 'suspended', 'closed'];
-      
+
       validStatuses.forEach((status) => {
         assert.doesNotThrow(() => accountStatusSchema.parse(status));
       });
@@ -141,7 +141,7 @@ describe('Validation Schemas', () => {
 
     it('should reject invalid account statuses', () => {
       const invalidStatuses = ['pending', 'frozen', 'invalid', ''];
-      
+
       invalidStatuses.forEach((status) => {
         assert.throws(() => accountStatusSchema.parse(status));
       });

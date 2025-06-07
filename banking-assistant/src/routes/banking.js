@@ -30,16 +30,16 @@ router.get(
   }),
   (req, res) => {
     const { accountId } = req.params;
-    
+
     const balance = getAccountBalance(accountId);
-    
+
     if (!balance) {
       return res.status(404).json({
         error: 'Account not found',
         accountId,
       });
     }
-    
+
     return res.json(balance);
   },
 );
@@ -61,16 +61,16 @@ router.get(
   (req, res) => {
     const { accountId } = req.params;
     const { limit, offset } = req.query;
-    
+
     if (!accountExists(accountId)) {
       return res.status(404).json({
         error: 'Account not found',
         accountId,
       });
     }
-    
+
     const transactions = getAccountTransactions(accountId, limit, offset);
-    
+
     return res.json(transactions);
   },
 );
@@ -153,9 +153,9 @@ router.get(
 );
 
 /**
- * Health check endpoint
+ * Health check endpoint with reverse proxy information
  * @route GET /api/v1/health
- * @returns {Object} Service health status
+ * @returns {Object} Service health status including proxy details
  */
 router.get('/health', (req, res) => {
   res.json({
@@ -163,6 +163,14 @@ router.get('/health', (req, res) => {
     status: 'healthy',
     timestamp: new Date().toISOString(),
     version: '1.0.0',
+    environment: process.env.NODE_ENV || 'development',
+    proxy: {
+      forwarded_for: req.get('X-Forwarded-For'),
+      forwarded_proto: req.get('X-Forwarded-Proto'),
+      forwarded_host: req.get('X-Forwarded-Host'),
+      real_ip: req.ip,
+      user_agent: req.get('User-Agent'),
+    },
   });
 });
 

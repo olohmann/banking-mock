@@ -18,7 +18,7 @@ const __dirname = dirname(__filename);
  */
 export function generateOpenAPISpec(options = {}) {
   const {
-    baseUrl = process.env.BANKING_API_BASE_URL,
+    baseUrl = process.env.BASE_URL,
     port = process.env.PORT || 3000,
     nodeEnv = process.env.NODE_ENV || 'development',
     apiVersion = process.env.API_VERSION || 'v1',
@@ -28,42 +28,25 @@ export function generateOpenAPISpec(options = {}) {
   const specPath = join(__dirname, '../../docs/openapi.yaml');
   const baseSpec = YAML.load(specPath);
 
-  // Generate server URLs based on environment and configuration
+  // Generate server URLs based on configuration
   const servers = [];
 
   if (baseUrl) {
-    // Use explicit base URL if provided
+    // Use explicit base URL if provided (handles reverse proxy scenarios)
     servers.push({
       url: baseUrl,
       description: 'Configured API server',
     });
   } else {
-    // Generate URLs based on environment
-    switch (nodeEnv) {
-      case 'production':
-        servers.push({
-          url: process.env.PRODUCTION_API_URL || 'https://api.yourdomain.com/banking/v1',
-          description: 'Production server',
-        });
-        break;
-      case 'staging':
-        servers.push({
-          url: process.env.STAGING_API_URL || 'https://api-staging.yourdomain.com/banking/v1',
-          description: 'Staging server',
-        });
-        break;
-      case 'development':
-      default:
-        servers.push({
-          url: `http://localhost:${port}/api/${apiVersion}`,
-          description: 'Development server',
-        });
-        break;
-    }
+    // Auto-generate URL for local development
+    servers.push({
+      url: `http://localhost:${port}/api/${apiVersion}`,
+      description: 'Local development server',
+    });
   }
 
-  // Always include localhost for development if not already present
-  if (nodeEnv !== 'development' && !servers.some((s) => s.url.includes('localhost'))) {
+  // Always include localhost for development if not already present and not in production
+  if (nodeEnv === 'development' && baseUrl && !baseUrl.includes('localhost')) {
     servers.push({
       url: `http://localhost:${port}/api/${apiVersion}`,
       description: 'Local development server',

@@ -1,4 +1,4 @@
-import { describe, it, beforeEach } from 'node:test';
+import { describe, it } from 'node:test';
 import assert from 'node:assert';
 import {
   getAccountBalance,
@@ -14,7 +14,7 @@ describe('Mock Data Service', () => {
   describe('getAccountBalance', () => {
     it('should return balance for valid account', () => {
       const result = getAccountBalance('ACC1234567890');
-      
+
       assert.strictEqual(result.accountId, 'ACC1234567890');
       assert.strictEqual(result.balance, 15420.50);
       assert.strictEqual(result.currency, 'USD');
@@ -30,7 +30,7 @@ describe('Mock Data Service', () => {
   describe('getAccountTransactions', () => {
     it('should return transactions for valid account', () => {
       const result = getAccountTransactions('ACC1234567890', 5, 0);
-      
+
       assert.strictEqual(result.accountId, 'ACC1234567890');
       assert.strictEqual(result.transactions.length, 5);
       assert.strictEqual(result.pagination.limit, 5);
@@ -45,7 +45,7 @@ describe('Mock Data Service', () => {
 
     it('should handle pagination correctly', () => {
       const result = getAccountTransactions('ACC1234567890', 3, 10);
-      
+
       assert.strictEqual(result.transactions.length, 3);
       assert.strictEqual(result.pagination.offset, 10);
     });
@@ -53,7 +53,7 @@ describe('Mock Data Service', () => {
     it('should generate consistent transactions for same account', () => {
       const result1 = getAccountTransactions('ACC1234567890', 5, 0);
       const result2 = getAccountTransactions('ACC1234567890', 5, 0);
-      
+
       assert.deepStrictEqual(result1.transactions, result2.transactions);
     });
   });
@@ -71,7 +71,7 @@ describe('Mock Data Service', () => {
   describe('getBankingAccountsByUserId', () => {
     it('should return accounts for valid user', () => {
       const result = getBankingAccountsByUserId('USER1234');
-      
+
       assert.strictEqual(result.data.length, 2);
       assert.strictEqual(result.pagination.total, 2);
       assert.strictEqual(result.data[0].userId, 'USER1234');
@@ -80,14 +80,14 @@ describe('Mock Data Service', () => {
 
     it('should return empty array for non-existent user', () => {
       const result = getBankingAccountsByUserId('NONEXISTENT');
-      
+
       assert.strictEqual(result.data.length, 0);
       assert.strictEqual(result.pagination.total, 0);
     });
 
     it('should handle pagination correctly', () => {
       const result = getBankingAccountsByUserId('USER1234', { limit: 1, offset: 0 });
-      
+
       assert.strictEqual(result.data.length, 1);
       assert.strictEqual(result.pagination.limit, 1);
       assert.strictEqual(result.pagination.offset, 0);
@@ -96,14 +96,14 @@ describe('Mock Data Service', () => {
 
     it('should filter by account type', () => {
       const result = getBankingAccountsByUserId('USER1234', { accountType: 'checking' });
-      
+
       assert.strictEqual(result.data.length, 1);
       assert.strictEqual(result.data[0].accountType, 'checking');
     });
 
     it('should filter by status', () => {
       const result = getBankingAccountsByUserId('USER1234', { status: 'active' });
-      
+
       assert.strictEqual(result.data.length, 2);
       result.data.forEach((account) => {
         assert.strictEqual(account.status, 'active');
@@ -114,7 +114,7 @@ describe('Mock Data Service', () => {
   describe('getBankingAccountById', () => {
     it('should return account for valid account ID', () => {
       const result = getBankingAccountById('ACC1234567890');
-      
+
       assert.strictEqual(result.accountId, 'ACC1234567890');
       assert.strictEqual(result.userId, 'USER1234');
       assert.strictEqual(result.accountType, 'checking');
@@ -140,7 +140,7 @@ describe('Mock Data Service', () => {
   describe('getAllUserIds', () => {
     it('should return all unique user IDs', () => {
       const result = getAllUserIds();
-      
+
       assert.strictEqual(result.length, 2);
       assert.ok(result.includes('USER1234'));
       assert.ok(result.includes('USER5678'));

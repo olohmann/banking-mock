@@ -13,15 +13,15 @@ export const validateRequest = (schemas) => (req, res, next) => {
     if (schemas.params) {
       req.params = schemas.params.parse(req.params);
     }
-    
+
     if (schemas.query) {
       req.query = schemas.query.parse(req.query);
     }
-    
+
     if (schemas.body) {
       req.body = schemas.body.parse(req.body);
     }
-    
+
     next();
   } catch (error) {
     if (error instanceof ZodError) {
@@ -33,7 +33,7 @@ export const validateRequest = (schemas) => (req, res, next) => {
         })),
       });
     }
-    
+
     return next(error);
   }
 };

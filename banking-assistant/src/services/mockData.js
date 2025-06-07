@@ -93,7 +93,7 @@ const TRANSACTION_TEMPLATES = [
  */
 export const getAccountBalance = (accountId) => {
   const mockBalance = MOCK_BALANCES[accountId];
-  
+
   if (!mockBalance) {
     return null;
   }
@@ -115,7 +115,7 @@ export const getAccountBalance = (accountId) => {
  */
 export const getAccountTransactions = (accountId, limit = 10, offset = 0) => {
   const balance = MOCK_BALANCES[accountId];
-  
+
   if (!balance) {
     return null;
   }
@@ -123,25 +123,25 @@ export const getAccountTransactions = (accountId, limit = 10, offset = 0) => {
   // Generate deterministic transactions based on account ID
   const seed = accountId.split('').reduce((acc, char) => acc + char.charCodeAt(0), 0);
   const totalTransactions = 50; // Mock total count
-  
+
   const transactions = [];
   let currentBalance = balance.balance;
 
   for (let i = offset; i < Math.min(offset + limit, totalTransactions); i += 1) {
     const templateIndex = (seed + i) % TRANSACTION_TEMPLATES.length;
     const template = TRANSACTION_TEMPLATES[templateIndex];
-    
+
     // Add some randomness to amounts
     const variance = (((seed + i) % 100) - 50) / 100; // -0.5 to 0.5
     const amount = Math.round((template.amount * (1 + variance * 0.1)) * 100) / 100;
-    
+
     // Generate date (more recent = lower index)
     const daysAgo = i + 1;
     const date = new Date();
     date.setDate(date.getDate() - daysAgo);
-    
+
     currentBalance -= amount; // Reverse calculation for historical balance
-    
+
     transactions.push({
       id: `TXN${accountId.slice(-4)}${String(i + 1).padStart(4, '0')}`,
       accountId,
