@@ -1,0 +1,11 @@
+# Infrastructure variables
+resource_group_name = "rg-banking-mock-dev"
+location           = "North Europe"
+acr_name          = "acrbankingmockdev"
+
+tags = {
+  Environment = "development"
+  Project     = "banking-mock"
+  Owner       = "development-team"
+  CreatedBy   = "terraform"
+}

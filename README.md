@@ -40,7 +40,7 @@ cd banking-brokerage && pnpm install && cd ..
 ./dev.sh
 ```
 
-### Docker Compose (Recommended)
+### Docker Compose (Local Development)
 
 ```bash
 # Start all services with Docker Compose
@@ -52,6 +52,19 @@ docker compose logs -f
 # Stop services
 docker compose down
 ```
+
+### Azure Cloud Deployment
+
+Deploy to Azure Container Apps with automated HTTPS endpoints:
+
+```bash
+# Complete automated deployment
+./scripts/deploy.sh
+```
+
+Or follow the [step-by-step deployment guide](./docs/DEPLOYMENT.md).
+
+**Prerequisites**: Azure CLI, Terraform, Docker
 
 ## 📊 Services Overview
 
@@ -175,6 +188,24 @@ docker compose up -d --scale banking-assistant=2
 # View service logs
 docker compose logs banking-assistant
 ```
+
+### Azure Container Apps (Production)
+
+Deploy to Azure with automated HTTPS endpoints and auto-scaling:
+
+```bash
+# One-command deployment
+./scripts/deploy.sh
+```
+
+**Features**:
+- 🌐 HTTPS endpoints with automatic SSL certificates
+- 🔄 Auto-scaling (1-3 replicas based on load)
+- 📊 Integrated monitoring with Log Analytics
+- 🔒 Private Azure Container Registry
+- 💰 Cost-optimized configuration
+
+See the [complete deployment guide](./docs/DEPLOYMENT.md) for detailed instructions.
 
 ### Environment Variables
 

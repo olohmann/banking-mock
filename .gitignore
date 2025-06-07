@@ -1,1 +1,36 @@
+# Environment files
 deploy.env
+.env
+.env.local
+
+# Terraform files
+*.tfstate
+*.tfstate.backup
+*.tfplan
+.terraform/
+.terraform.lock.hcl
+terraform.tfvars
+
+# Node.js
+node_modules/
+npm-debug.log*
+*.log
+
+# Coverage reports
+coverage/
+.nyc_output
+
+# Docker
+.dockerignore
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# macOS
+.DS_Store
+
+# Windows
+Thumbs.db

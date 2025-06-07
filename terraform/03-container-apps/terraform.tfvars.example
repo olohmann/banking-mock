@@ -1,0 +1,12 @@
+# Container Apps deployment variables
+resource_group_name           = "rg-banking-mock-dev"
+acr_name                     = "acrbankingmockdev"
+container_app_environment_name = "cae-banking-mock-dev"
+image_tag                    = "latest"
+
+tags = {
+  Environment = "development"
+  Project     = "banking-mock"
+  Owner       = "development-team"
+  CreatedBy   = "terraform"
+}
