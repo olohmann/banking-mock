@@ -1,14 +1,9 @@
 import express from 'express';
 import swaggerUi from 'swagger-ui-express';
-import YAML from 'yamljs';
-import { fileURLToPath } from 'node:url';
-import { dirname, join } from 'node:path';
 import config from './config/index.js';
 import bankingRoutes from './routes/banking.js';
 import { errorHandler, notFoundHandler } from './middleware/index.js';
-
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = dirname(__filename);
+import { generateOpenAPISpec } from './utils/openapi.js';
 
 /**
  * Create Express application instance
@@ -40,8 +35,12 @@ const createApp = () => {
     next();
   });
 
-  // Load OpenAPI spec
-  const openApiSpec = YAML.load(join(__dirname, '../docs/openapi.yaml'));
+  // Load OpenAPI spec with dynamic server URLs
+  const openApiSpec = generateOpenAPISpec({
+    port: config.PORT,
+    nodeEnv: config.NODE_ENV,
+    apiVersion: config.API_VERSION,
+  });
   
   // API documentation
   app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(openApiSpec, {
@@ -107,7 +106,6 @@ const startServer = async () => {
 
     process.on('SIGTERM', () => shutdown('SIGTERM'));
     process.on('SIGINT', () => shutdown('SIGINT'));
-
   } catch (error) {
     console.error('Failed to start server:', error);
     process.exit(1);
