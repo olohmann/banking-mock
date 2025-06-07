@@ -27,6 +27,9 @@ Before starting the deployment, ensure you have:
 ```bash
 # Run the complete deployment process
 ./scripts/deploy.sh
+
+# Deploy with specific image tag
+IMAGE_TAG=v1.2.3 ./scripts/deploy.sh
 ```
 
 This script will:
@@ -107,16 +110,35 @@ image_tag                    = "latest"
 
 ## Environment Variables
 
-The build script supports the following environment variables:
+The deployment scripts support the following environment variables:
 
 - `ACR_NAME` - Azure Container Registry name (auto-detected)
-- `RESOURCE_GROUP` - Resource Group name (auto-detected)
+- `RESOURCE_GROUP` - Resource Group name (auto-detected)  
 - `IMAGE_TAG` - Docker image tag (default: `latest`)
+
+The `IMAGE_TAG` variable is supported by:
+- `./scripts/build-containers.sh` - Tags and pushes Docker images
+- `./scripts/deploy.sh` - Full deployment with specified image tag
+- `./scripts/update-containers.sh` - Updates existing deployment with new image
 
 Example with custom image tag:
 ```bash
 IMAGE_TAG=v1.2.3 ./scripts/build-containers.sh
 ```
+
+### Updating Existing Deployment
+
+If you already have a deployment and want to update the containers with a new image:
+
+```bash
+# Update containers with new image tag
+IMAGE_TAG=v1.2.4 ./scripts/update-containers.sh
+```
+
+This script will:
+- Build and push new containers with the specified tag
+- Update Container Apps to use the new images
+- Skip infrastructure deployment (faster for code updates)
 
 ## Service Endpoints
 

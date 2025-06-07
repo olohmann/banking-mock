@@ -101,8 +101,15 @@ deploy_container_apps() {
     print_status "Initializing Terraform..."
     terraform init
     
+    # Pass IMAGE_TAG environment variable to Terraform if set
+    local terraform_vars=""
+    if [[ -n "${IMAGE_TAG:-}" ]]; then
+        print_status "Using IMAGE_TAG: $IMAGE_TAG"
+        terraform_vars="-var image_tag=$IMAGE_TAG"
+    fi
+    
     print_status "Planning container apps deployment..."
-    terraform plan -out=tfplan
+    terraform plan $terraform_vars -out=tfplan
     
     print_status "Applying container apps changes..."
     terraform apply tfplan
@@ -127,6 +134,11 @@ cleanup() {
 
 main() {
     print_header "Banking Mock Services - Complete Deployment"
+    
+    # Show IMAGE_TAG being used
+    local image_tag="${IMAGE_TAG:-latest}"
+    print_status "Deploying with image tag: $image_tag"
+    echo
     
     # Trap to ensure cleanup on exit
     trap cleanup EXIT
@@ -176,6 +188,13 @@ if [[ "${1:-}" == "--help" ]] || [[ "${1:-}" == "-h" ]]; then
     echo "  3. Deploy Container Apps with HTTPS endpoints"
     echo
     echo "Usage: $0"
+    echo
+    echo "Environment Variables:"
+    echo "  IMAGE_TAG  - Docker image tag to build and deploy (default: latest)"
+    echo
+    echo "Examples:"
+    echo "  $0                    # Deploy with 'latest' tag"
+    echo "  IMAGE_TAG=v1.2.3 $0   # Deploy with specific tag"
     echo
     echo "Prerequisites:"
     echo "  - Azure CLI installed and logged in (az login)"

@@ -196,6 +196,12 @@ Deploy to Azure with automated HTTPS endpoints and auto-scaling:
 ```bash
 # One-command deployment
 ./scripts/deploy.sh
+
+# Deploy with specific image tag
+IMAGE_TAG=v1.2.3 ./scripts/deploy.sh
+
+# Update existing deployment with new image
+IMAGE_TAG=v1.2.4 ./scripts/update-containers.sh
 ```
 
 **Features**:

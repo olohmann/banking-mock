@@ -14,6 +14,7 @@ banking-mock/
 ├── scripts/                          # Deployment scripts
 │   ├── deploy.sh                     # Complete deployment automation
 │   ├── build-containers.sh           # Container build and push
+│   ├── update-containers.sh          # Update existing deployment
 │   └── destroy.sh                    # Resource cleanup
 │
 ├── terraform/                        # Infrastructure as Code
