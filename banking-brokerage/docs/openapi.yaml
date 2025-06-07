@@ -1,0 +1,397 @@
+openapi: 3.0.3
+info:
+  title: Banking Brokerage Mock API
+  description: Mock brokerage API for investment account management and trading operations
+  version: 1.0.0
+  contact:
+    name: Banking Brokerage Team
+  license:
+    name: MIT
+servers:
+  - url: http://localhost:3001/api/v1
+    description: Development server
+paths:
+  /health:
+    get:
+      summary: Health check
+      description: Returns the health status of the brokerage API
+      operationId: getHealth
+      tags:
+        - Health
+      responses:
+        '200':
+          description: Service is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  service:
+                    type: string
+                    example: banking-brokerage-mock
+                  status:
+                    type: string
+                    example: healthy
+                  timestamp:
+                    type: string
+                    format: date-time
+                  version:
+                    type: string
+                    example: 1.0.0
+  /brokerage/accounts:
+    post:
+      summary: Create new brokerage account
+      description: Opens a new brokerage account for investment trading
+      operationId: createBrokerageAccount
+      tags:
+        - Brokerage Accounts
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateBrokerageAccountRequest'
+            examples:
+              individual_account:
+                summary: Individual trading account
+                value:
+                  userId: USER1234
+                  accountType: individual
+                  initialDeposit: 5000
+                  tradingPermissions: ["stocks", "options"]
+                  riskTolerance: moderate
+              ira_account:
+                summary: IRA retirement account
+                value:
+                  userId: USER5678
+                  accountType: ira
+                  initialDeposit: 10000
+                  tradingPermissions: ["stocks"]
+                  riskTolerance: conservative
+      responses:
+        '201':
+          description: Brokerage account created successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BrokerageAccount'
+        '400':
+          description: Invalid request data
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServerError'
+  /brokerage/users/{userId}/accounts:
+    get:
+      summary: List user's brokerage accounts
+      description: Retrieve all brokerage accounts for a specific user with pagination and filtering
+      operationId: getUserBrokerageAccounts
+      tags:
+        - Brokerage Accounts
+      parameters:
+        - name: userId
+          in: path
+          required: true
+          description: Unique user identifier
+          schema:
+            type: string
+            pattern: '^[A-Z0-9]{8,16}$'
+            example: USER1234
+        - name: limit
+          in: query
+          required: false
+          description: Number of accounts to return (1-50)
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 50
+            default: 10
+            example: 10
+        - name: offset
+          in: query
+          required: false
+          description: Number of accounts to skip for pagination
+          schema:
+            type: integer
+            minimum: 0
+            default: 0
+            example: 0
+        - name: status
+          in: query
+          required: false
+          description: Filter accounts by status
+          schema:
+            type: string
+            enum: [pending, active, suspended, closed]
+            example: active
+        - name: accountType
+          in: query
+          required: false
+          description: Filter accounts by type
+          schema:
+            type: string
+            enum: [individual, joint, ira, roth_ira, business]
+            example: individual
+      responses:
+        '200':
+          description: List of brokerage accounts retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedBrokerageAccounts'
+        '400':
+          description: Invalid user ID or query parameters
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServerError'
+  /brokerage/accounts/{accountId}:
+    get:
+      summary: Get brokerage account details
+      description: Retrieve detailed information for a specific brokerage account
+      operationId: getBrokerageAccount
+      tags:
+        - Brokerage Accounts
+      parameters:
+        - name: accountId
+          in: path
+          required: true
+          description: Unique brokerage account identifier
+          schema:
+            type: string
+            pattern: '^BRK[A-Z0-9]{8,12}$'
+            example: BRK1A2B3C4D5
+      responses:
+        '200':
+          description: Brokerage account details retrieved successfully
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BrokerageAccount'
+        '400':
+          description: Invalid account ID format
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ValidationError'
+        '404':
+          description: Brokerage account not found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/NotFoundError'
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ServerError'
+
+components:
+  schemas:
+    CreateBrokerageAccountRequest:
+      type: object
+      required:
+        - userId
+        - accountType
+        - initialDeposit
+      properties:
+        userId:
+          type: string
+          pattern: '^[A-Z0-9]{8,16}$'
+          description: Unique user identifier
+          example: USER1234
+        accountType:
+          type: string
+          enum: [individual, joint, ira, roth_ira, business]
+          description: Type of brokerage account
+          example: individual
+        initialDeposit:
+          type: number
+          minimum: 0
+          maximum: 10000000
+          description: Initial deposit amount in USD
+          example: 5000
+        tradingPermissions:
+          type: array
+          items:
+            type: string
+            enum: [stocks, options, crypto, forex]
+          default: [stocks]
+          description: Trading permissions for the account
+          example: ["stocks", "options"]
+        riskTolerance:
+          type: string
+          enum: [conservative, moderate, aggressive]
+          default: moderate
+          description: Risk tolerance level
+          example: moderate
+
+    BrokerageAccount:
+      type: object
+      properties:
+        accountId:
+          type: string
+          pattern: '^BRK[A-Z0-9]{8,12}$'
+          description: Unique brokerage account identifier
+          example: BRK1A2B3C4D5
+        userId:
+          type: string
+          pattern: '^[A-Z0-9]{8,16}$'
+          description: User who owns the account
+          example: USER1234
+        accountType:
+          type: string
+          enum: [individual, joint, ira, roth_ira, business]
+          description: Type of brokerage account
+          example: individual
+        status:
+          type: string
+          enum: [pending, active, suspended, closed]
+          description: Current account status
+          example: active
+        balance:
+          type: number
+          description: Total account balance in USD
+          example: 25750.50
+        availableBalance:
+          type: number
+          description: Available balance for trading in USD
+          example: 23750.50
+        currency:
+          type: string
+          length: 3
+          description: Account currency code
+          example: USD
+        tradingPermissions:
+          type: array
+          items:
+            type: string
+          description: Allowed trading instruments
+          example: ["stocks", "options"]
+        riskTolerance:
+          type: string
+          description: Account risk tolerance level
+          example: moderate
+        createdAt:
+          type: string
+          format: date-time
+          description: Account creation timestamp
+          example: "2024-01-15T10:30:00.000Z"
+        lastActivity:
+          type: string
+          format: date-time
+          description: Last account activity timestamp
+          example: "2025-06-06T14:22:00.000Z"
+
+    PaginatedBrokerageAccounts:
+      type: object
+      properties:
+        data:
+          type: array
+          items:
+            $ref: '#/components/schemas/BrokerageAccount'
+          description: List of brokerage accounts
+        pagination:
+          type: object
+          properties:
+            total:
+              type: integer
+              description: Total number of accounts
+              example: 25
+            limit:
+              type: integer
+              description: Number of accounts per page
+              example: 10
+            offset:
+              type: integer
+              description: Number of accounts skipped
+              example: 0
+            hasMore:
+              type: boolean
+              description: Whether there are more accounts available
+              example: true
+
+    ValidationError:
+      type: object
+      properties:
+        error:
+          type: string
+          example: Validation failed
+        details:
+          type: array
+          items:
+            type: object
+            properties:
+              field:
+                type: string
+                example: userId
+              message:
+                type: string
+                example: User ID must be 8-16 alphanumeric characters
+
+    NotFoundError:
+      type: object
+      properties:
+        error:
+          type: string
+          example: Brokerage account not found
+        accountId:
+          type: string
+          example: BRK1A2B3C4D5
+
+    ServerError:
+      type: object
+      properties:
+        error:
+          type: string
+          example: Internal server error
+
+  examples:
+    IndividualAccount:
+      summary: Individual brokerage account
+      value:
+        accountId: BRK1A2B3C4D5
+        userId: USER1234
+        accountType: individual
+        status: active
+        balance: 25750.50
+        availableBalance: 23750.50
+        currency: USD
+        tradingPermissions: ["stocks", "options"]
+        riskTolerance: moderate
+        createdAt: "2024-01-15T10:30:00.000Z"
+        lastActivity: "2025-06-06T14:22:00.000Z"
+
+    IRAAccount:
+      summary: IRA retirement account
+      value:
+        accountId: BRK2X3Y4Z5A6
+        userId: USER1234
+        accountType: ira
+        status: active
+        balance: 45250.75
+        availableBalance: 45250.75
+        currency: USD
+        tradingPermissions: ["stocks"]
+        riskTolerance: conservative
+        createdAt: "2024-03-20T09:15:00.000Z"
+        lastActivity: "2025-06-05T11:45:00.000Z"
+
+tags:
+  - name: Health
+    description: Service health and status endpoints
+  - name: Brokerage Accounts
+    description: Brokerage account management operations

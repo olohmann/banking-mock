@@ -1,0 +1,26 @@
+{
+  "env": {
+    "node": true,
+    "es2023": true
+  },
+  "extends": [
+    "airbnb-base"
+  ],
+  "parserOptions": {
+    "ecmaVersion": 2023,
+    "sourceType": "module"
+  },
+  "rules": {
+    "import/extensions": ["error", "ignorePackages"],
+    "no-console": "off",
+    "consistent-return": "off"
+  },
+  "overrides": [
+    {
+      "files": ["**/*.test.js"],
+      "rules": {
+        "import/no-extraneous-dependencies": "off"
+      }
+    }
+  ]
+}
